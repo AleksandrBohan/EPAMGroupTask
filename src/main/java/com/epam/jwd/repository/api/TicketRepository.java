@@ -10,10 +10,16 @@ import java.util.List;
 public interface TicketRepository<V, T extends Entity<V>> {
 
     void save(Ticket ticket) throws UnavailableSaveTicketException;
+
     T findById(V id);
+
     T findByMovieName(String movieName) throws NoFindMovieException;
+
     boolean delete(Ticket ticket);
+
     List<T> findAllAvailable();
+
     List<T> findAll();
+
     List<T> findAllAvailableTicketsForKids();
 }

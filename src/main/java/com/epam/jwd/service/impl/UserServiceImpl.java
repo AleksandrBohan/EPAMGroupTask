@@ -12,7 +12,6 @@ import com.epam.jwd.service.api.UserService;
 import com.epam.jwd.service.exception.*;
 import com.epam.jwd.service.validation.TicketValidation;
 import com.epam.jwd.service.validation.UserValidation;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,16 +35,10 @@ public class UserServiceImpl implements UserService {
     private static final String MOVIE_NAME_ON_TICKET = "Tickets will be sorted by movie name!";
     private static final String USER_ACTIONS_IN = "User signed in!";
     private static final String USER_ACTIONS_OUT = "User signed out!";
-
-    private User user;
     private static final String NOT_FOUND_MESSAGE_TEMPLATE = "User not found: ";
     private static final String NOT_FOUND_IN_REPOSITORY_MESSAGE = NOT_FOUND_MESSAGE_TEMPLATE + "User not found in repository.";
     private static final String NOT_FOUND_USERNAME_MESSAGE = NOT_FOUND_MESSAGE_TEMPLATE + "Not found user name : ";
     private static final String NOT_ACTIVE_MESSAGE = "User not active: ";
-
-    private final UserRepository<Long, User> userRepository = UserRepositoryImpl.getInstance();
-    private final TicketRepository<Long, Ticket> ticketRepository = TicketRepositoryImpl.getInstance();
-
     private static final String NO_CASH_EXCEPTION_MESSAGE = "There is no money in your pocket to buy this ticket";
     private static final String ILLEGAL_NAME_SIZE_EXCEPTION_MESSAGE = "Name must be 1 or more symbols long";
     private static final String ILLEGAL_AGE_EXCEPTION_MESSAGE = "Age should be above 0";
@@ -53,25 +46,27 @@ public class UserServiceImpl implements UserService {
     private static final String UNAVAILABLE_TICKET_EXCEPTION = "This ticket is not available";
     private static final String NO_FIND_MOVIE_EXCEPTION = "This film is not found";
 
-
+    private User user;
+    private final UserRepository<Long, User> userRepository = UserRepositoryImpl.getInstance();
+    private final TicketRepository<Long, Ticket> ticketRepository = TicketRepositoryImpl.getInstance();
 
     @Override
     public void registration(User user) {
-        logger.log(Level.INFO, USER_REGISTRATION);
+        logger.info(USER_REGISTRATION);
 
         try {
             userRepository.save(user);
         } catch (UnavailableSaveUserException e) {
-           logger.log(Level.ERROR, e);
+            logger.error(e);
         }
         try {
-            this.user = userRepository.findUser(user).orElseThrow(() ->
+            this.user = userRepository.findUser(user)
+                    .orElseThrow(() ->
                     new UserNotFoundException(NOT_FOUND_IN_REPOSITORY_MESSAGE));
         } catch (UserNotFoundException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
         this.user.setActive(true);
-
     }
 
 
@@ -80,11 +75,11 @@ public class UserServiceImpl implements UserService {
             try {
                 throw new UserNotActiveException(NOT_ACTIVE_MESSAGE);
             } catch (UserNotActiveException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
 
-        logger.log(Level.INFO, USER_BALANCE);
+        logger.info(USER_BALANCE);
 
         return user.getBalance();
     }
@@ -95,19 +90,19 @@ public class UserServiceImpl implements UserService {
             try {
                 throw new UserNotActiveException(NOT_ACTIVE_MESSAGE);
             } catch (UserNotActiveException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
         try {
-            if(!UserValidation.isValidName(userName)){
-               throw new IllegalNameSizeException(ILLEGAL_NAME_SIZE_EXCEPTION_MESSAGE);
-           }
+            if (!UserValidation.isValidName(userName)) {
+                throw new IllegalNameSizeException(ILLEGAL_NAME_SIZE_EXCEPTION_MESSAGE);
+            }
         } catch (IllegalNameSizeException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
 
-        logger.log(Level.INFO, OTHER_USER_NAME);
-        logger.log(Level.DEBUG, userName);
+        logger.info(OTHER_USER_NAME);
+        logger.debug(userName);
 
         user.setName(userName);
     }
@@ -118,20 +113,20 @@ public class UserServiceImpl implements UserService {
             try {
                 throw new UserNotActiveException(NOT_ACTIVE_MESSAGE);
             } catch (UserNotActiveException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
 
         try {
-            if(!UserValidation.isValidAge(age)){
-                 throw new IllegalAgeException(ILLEGAL_AGE_EXCEPTION_MESSAGE);
-             }
+            if (!UserValidation.isValidAge(age)) {
+                throw new IllegalAgeException(ILLEGAL_AGE_EXCEPTION_MESSAGE);
+            }
         } catch (IllegalAgeException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
 
-        logger.log(Level.INFO, NORMAL_AGE);
-        logger.log(Level.DEBUG, age);
+        logger.info(NORMAL_AGE);
+        logger.debug(age);
 
         user.setAge(age);
     }
@@ -142,32 +137,32 @@ public class UserServiceImpl implements UserService {
             try {
                 throw new UserNotActiveException(NOT_ACTIVE_MESSAGE);
             } catch (UserNotActiveException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
         try {
-            if(!isEmail(userEmail)){
+            if (!isEmail(userEmail)) {
                 throw new IllegalEmailException(ILLEGAL_EMAIL_EXCEPTION_MESSAGE);
             }
         } catch (IllegalEmailException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
 
-        logger.log(Level.INFO, OTHER_USER_EMAIL);
-        logger.log(Level.DEBUG, userEmail);
+        logger.info(OTHER_USER_EMAIL);
+        logger.debug(userEmail);
 
         user.setEmail(userEmail);
     }
 
     @Override
     public void buyTicket(String movieName) {
-        logger.log(Level.DEBUG, movieName);
+        logger.debug(movieName);
 
         if (!user.isActive()) {
             try {
                 throw new UserNotActiveException(NOT_ACTIVE_MESSAGE);
             } catch (UserNotActiveException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
 
@@ -175,34 +170,29 @@ public class UserServiceImpl implements UserService {
         try {
             ticket = ticketRepository.findByMovieName(movieName);
         } catch (NoFindMovieException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
 
-        if (ticket == null){
-            try {
-                throw new NoFindMovieException(NO_FIND_MOVIE_EXCEPTION);
-            } catch (NoFindMovieException e) {
-                logger.log(Level.ERROR, e);
-            }
-        }
-        if(!TicketValidation.isAvailable(ticket)) {
+        if (!TicketValidation.isAvailable(ticket)) {
             try {
                 throw new UnavailableTicketException(UNAVAILABLE_TICKET_EXCEPTION);
             } catch (UnavailableTicketException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
+
         try {
-            if(!UserValidation.isEnoughCash(user,ticket.getPrice())){
+            if (!UserValidation.isEnoughCash(user, ticket.getPrice())) {
                 throw new NoCashException(NO_CASH_EXCEPTION_MESSAGE);
             }
+            user.addTicket(ticket);
+            ticketRepository.delete(ticket);
+            user.setBalance(user.getBalance() - ticket.getPrice());
         } catch (NoCashException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
-        user.addTicket(ticket);
-        ticketRepository.delete(ticket);
 
-        logger.log(Level.INFO, TICKET_BUYING);
+        logger.info(TICKET_BUYING);
     }
 
     @Override
@@ -211,18 +201,18 @@ public class UserServiceImpl implements UserService {
         try {
             ticket = ticketRepository.findByMovieName(movieName);
         } catch (NoFindMovieException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
-        if (ticket == null){
+        if (ticket == null) {
             try {
                 throw new NoFindMovieException(NO_FIND_MOVIE_EXCEPTION);
             } catch (NoFindMovieException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
 
-        logger.log(Level.INFO, TICKET_PRICE);
-        logger.log(Level.DEBUG, movieName);
+        logger.info(TICKET_PRICE);
+        logger.debug(movieName);
 
         return ticket.getPrice();
     }
@@ -239,8 +229,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Ticket> getTicketsByMovieName(String movieName) {
-        logger.log(Level.INFO, MOVIE_NAME_ON_TICKET);
-        logger.log(Level.DEBUG, movieName);
+        logger.info(MOVIE_NAME_ON_TICKET);
+        logger.debug(movieName);
 
         return ticketRepository.findAllAvailable().stream()
                 .filter(movie -> movie.getMovieName().equals(movieName))
@@ -249,14 +239,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void signIn(String userName) {
-        logger.log(Level.INFO, USER_ACTIONS_IN);
-        logger.log(Level.DEBUG, userName);
+        logger.info(USER_ACTIONS_IN);
+        logger.debug(userName);
 
         try {
             this.user = userRepository.findByUserName(userName).orElseThrow(() ->
                     new UserNotFoundException(NOT_FOUND_USERNAME_MESSAGE + userName));
         } catch (UserNotFoundException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
         user.setActive(true);
     }
@@ -265,6 +255,11 @@ public class UserServiceImpl implements UserService {
     public void signOut() {
         user.setActive(false);
 
-        logger.log(Level.INFO, USER_ACTIONS_OUT);
+        logger.info(USER_ACTIONS_OUT);
+    }
+
+    @Override
+    public List<Ticket> getUsersTickets() {
+        return user.getTickets();
     }
 }

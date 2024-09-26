@@ -1,6 +1,6 @@
 package com.epam.jwd.repository.exception;
 
-public class UnavailableSaveUserException extends Exception{
+public class UnavailableSaveUserException extends Exception {
     public UnavailableSaveUserException() {
     }
 

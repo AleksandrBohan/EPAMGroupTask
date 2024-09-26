@@ -10,7 +10,6 @@ import com.epam.jwd.service.api.TicketFactory;
 import com.epam.jwd.service.impl.ticket_factory.FranceTicketFactory;
 import com.epam.jwd.service.impl.ticket_factory.RussianTicketFactory;
 import com.epam.jwd.service.impl.ticket_factory.USATicketFactory;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,17 +27,16 @@ public class SellerServiceImpl implements SellerService {
     private static final String SAVE_TICKET = "Ticket was saved!";
     private static final String MOVIE_NAME_TICKET = "Ticket was deleted by movie name!";
     private static final String FULL_CINEMA_HALL = "Cinema hall was full";
-
+    private static final int NUMBER_OF_SEATS = 5;
 
     private final TicketRepository<Long, Ticket> ticketRepository = TicketRepositoryImpl.getInstance();
-    private static final int NUMBER_OF_SEATS = 5;
 
     @Override
     public void createUSAMovieTicketList() {
         TicketFactory factory = new USATicketFactory();
         createTicketList(fillCinemaHall(factory));
 
-        logger.log(Level.INFO, USA_MOVIE_TICKETS);
+        logger.info(USA_MOVIE_TICKETS);
     }
 
     @Override
@@ -46,7 +44,7 @@ public class SellerServiceImpl implements SellerService {
         TicketFactory factory = new FranceTicketFactory();
         createTicketList(fillCinemaHall(factory));
 
-        logger.log(Level.INFO, FRANCE_MOVIE_TICKETS);
+        logger.info(FRANCE_MOVIE_TICKETS);
     }
 
     @Override
@@ -54,7 +52,7 @@ public class SellerServiceImpl implements SellerService {
         TicketFactory factory = new RussianTicketFactory();
         createTicketList(fillCinemaHall(factory));
 
-        logger.log(Level.INFO, RUSSIAN_MOVIE_TICKETS);
+        logger.info(RUSSIAN_MOVIE_TICKETS);
     }
 
     private void createTicketList(List<Ticket> listOfTickets) {
@@ -62,23 +60,23 @@ public class SellerServiceImpl implements SellerService {
             try {
                 ticketRepository.save(ticket);
             } catch (UnavailableSaveTicketException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
 
-            logger.log(Level.DEBUG, ticket);
+            logger.debug(ticket);
         }
 
-        logger.log(Level.INFO, MOVIE_TICKETS);
+        logger.info(MOVIE_TICKETS);
     }
 
     private void createTicket(Ticket ticket) {
         try {
             ticketRepository.save(ticket);
         } catch (UnavailableSaveTicketException e) {
-            logger.log(Level.ERROR, e);
+            logger.error(e);
         }
 
-        logger.log(Level.INFO, SAVE_TICKET);
+        logger.info(SAVE_TICKET);
     }
 
     private void deleteTicketsByMovieName(String movieName) {
@@ -86,10 +84,10 @@ public class SellerServiceImpl implements SellerService {
             if (ticket.getMovieName().equals(movieName)) {
                 ticketRepository.delete(ticket);
 
-                logger.log(Level.DEBUG, ticket);
+                logger.debug(ticket);
             }
 
-            logger.log(Level.INFO, MOVIE_NAME_TICKET);
+            logger.info(MOVIE_NAME_TICKET);
         }
     }
 
@@ -104,7 +102,7 @@ public class SellerServiceImpl implements SellerService {
             ticketList.add(factory.createMelodramaMovieTicket());
         }
 
-        logger.log(Level.INFO, FULL_CINEMA_HALL);
+        logger.info(FULL_CINEMA_HALL);
 
         return ticketList;
     }

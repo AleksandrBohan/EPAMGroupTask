@@ -12,16 +12,28 @@ public interface UserService {
 
 
     void registration(User user) throws UserNotFoundException, UnavailableSaveUserException;
+
     void buyTicket(String movieName) throws UnavailableTicketException, NoCashException, UserNotActiveException, NoFindMovieException;
+
     double checkTicketPrice(String movieName) throws NoFindMovieException;
+
     double getBalance() throws UserNotActiveException;
+
     void changeUserName(String userName) throws IllegalNameSizeException, UserNotActiveException;
+
     void changeUserAge(int age) throws IllegalAgeException, UserNotActiveException;
+
     void changeUserEmail(String userEmail) throws IllegalEmailException, UserNotActiveException;
 
+    List<Ticket> getUsersTickets();
+
     List<Ticket> getAvailableTickets();
+
     List<Ticket> getAvailableForKidsTickets();
+
     List<Ticket> getTicketsByMovieName(String movieName);
+
     void signIn(String userName) throws UserNotFoundException;
+
     void signOut();
 }

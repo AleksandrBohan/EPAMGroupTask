@@ -1,6 +1,6 @@
 package com.epam.jwd.repository.exception;
 
-public class NoFindMovieException extends Exception{
+public class NoFindMovieException extends Exception {
     public NoFindMovieException() {
     }
 

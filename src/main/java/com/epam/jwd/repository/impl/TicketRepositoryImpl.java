@@ -23,20 +23,18 @@ public class TicketRepositoryImpl implements TicketRepository<Long, Ticket> {
     private static final String ALL_AVAILABLE_TICKETS = "All available tickets are searched!";
     private static final String ALL_AVAILABLE_TICKETS_FOR_KIDS = "All available tickets for kids are searched!";
     private static final String MOVIE_NAME = "Movie was found by movie name";
-
-
+    private static final String UNAVAILABLE_SAVE_TICKET_EXCEPTION = "Can not save the ticket";
+    private static final String NO_FIND_MOVIE_EXCEPTION = "This film is not found";
 
     private static TicketRepositoryImpl instance;
     private final List<Ticket> ticketStorage = new ArrayList<>();
-    private final static String UNAVAILABLE_SAVE_TICKET_EXCEPTION = "Can not save the ticket";
-    private final static String NO_FIND_MOVIE_EXCEPTION = "This film is not found";
 
     private TicketRepositoryImpl() {
     }
 
     public static TicketRepositoryImpl getInstance() {
         if (instance == null) {
-            logger.log(Level.INFO, CHECK_FOR_NULL);
+            logger.info(CHECK_FOR_NULL);
 
             instance = new TicketRepositoryImpl();
         }
@@ -45,26 +43,25 @@ public class TicketRepositoryImpl implements TicketRepository<Long, Ticket> {
     }
 
     @Override
-    public void save(Ticket ticket)  {
-        logger.log(Level.INFO, SAVED_TICKET);
+    public void save(Ticket ticket) {
+        logger.info(SAVED_TICKET);
 
-        try{
+        try {
             ticketStorage.add(ticket);
-        }
-        catch (Exception exception){
-            logger.log(Level.ERROR, exception);
+        } catch (Exception exception) {
+            logger.error(exception);
             try {
                 throw new UnavailableSaveTicketException(UNAVAILABLE_SAVE_TICKET_EXCEPTION + "( " + exception.getMessage() + " ).");
             } catch (UnavailableSaveTicketException e) {
-               logger.log(Level.ERROR, e);
+                logger.error(UNAVAILABLE_SAVE_TICKET_EXCEPTION, e);
             }
         }
     }
 
     @Override
     public Ticket findById(Long id) {
-        logger.log(Level.INFO, ID_SORTING);
-        logger.log(Level.DEBUG, id);
+        logger.info(ID_SORTING);
+        logger.debug(id);
 
         return ticketStorage.stream()
                 .filter(ticket -> id.equals(ticket.getId()))
@@ -74,14 +71,14 @@ public class TicketRepositoryImpl implements TicketRepository<Long, Ticket> {
 
     @Override
     public boolean delete(Ticket ticket) {
-        logger.log(Level.INFO, REMOVED_TICKET);
+        logger.info(REMOVED_TICKET);
 
         return ticketStorage.remove(ticket);
     }
 
     @Override
     public List<Ticket> findAllAvailable() {
-        logger.log(Level.INFO, ALL_AVAILABLE_TICKETS);
+        logger.info(ALL_AVAILABLE_TICKETS);
 
         return ticketStorage.stream()
                 .filter(Ticket::isAvailable)
@@ -95,7 +92,7 @@ public class TicketRepositoryImpl implements TicketRepository<Long, Ticket> {
 
     @Override
     public List<Ticket> findAllAvailableTicketsForKids() {
-        logger.log(Level.INFO, ALL_AVAILABLE_TICKETS_FOR_KIDS);
+        logger.info(ALL_AVAILABLE_TICKETS_FOR_KIDS);
 
         return ticketStorage.stream()
                 .filter(Ticket::isAvailableForKids)
@@ -104,18 +101,18 @@ public class TicketRepositoryImpl implements TicketRepository<Long, Ticket> {
 
     @Override
     public Ticket findByMovieName(String movieName) {
-        logger.log(Level.INFO, MOVIE_NAME);
-        logger.log(Level.DEBUG, movieName);
+        logger.info(MOVIE_NAME);
+        logger.debug(movieName);
 
-        Ticket ticket =  ticketStorage.stream()
+        Ticket ticket = ticketStorage.stream()
                 .filter(tckt -> movieName.equals(tckt.getMovieName())
                         && tckt.isAvailable())
                 .findFirst().orElse(null);
-        if (ticket == null){
+        if (ticket == null) {
             try {
                 throw new NoFindMovieException(NO_FIND_MOVIE_EXCEPTION);
             } catch (NoFindMovieException e) {
-                logger.log(Level.ERROR, e);
+                logger.error(e);
             }
         }
         return ticket;
